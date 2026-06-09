@@ -45,6 +45,11 @@ export default function Visitas() {
       </header>
 
       <main style={styles.main}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+            <button style={styles.btnNova} onClick={() => navigate('/visitas/nova')}>
+              + Nova Visita
+            </button>
+          </div>
         {carregando ? (
           <p style={styles.msg}>Carregando...</p>
         ) : visitas.length === 0 ? (
@@ -139,5 +144,9 @@ const styles = {
   btnFinalizar: {
     backgroundColor: '#10b981', color: '#fff', border: 'none',
     padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: '600',
+  },
+  btnNova: {
+    backgroundColor: '#4f46e5', color: '#fff', border: 'none',
+    padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600',
   },
 };

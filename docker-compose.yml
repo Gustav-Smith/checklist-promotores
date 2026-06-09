@@ -1,0 +1,48 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: checklist-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: checklist
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - checklist-network
+
+  backend:
+    build: .
+    container_name: checklist-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/checklist
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      JWT_SECRET: minha-chave-super-secreta-checklist-promotores-2026
+      JWT_EXPIRATION: 86400000
+    depends_on:
+      - postgres
+    networks:
+      - checklist-network
+
+  frontend:
+    build: ./checklist-frontend
+    container_name: checklist-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - checklist-network
+
+networks:
+  checklist-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
