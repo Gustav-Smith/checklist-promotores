@@ -35,13 +35,13 @@ export default function Dashboard() {
 
         <div style={styles.grid}>
           <Card titulo="Visitas Hoje" valor="—" icon="📋" cor="#4f46e5"
-                onClick={() => navigate('/visitas')} />
+            onClick={() => navigate('/visitas?filtro=HOJE')} />
           <Card titulo="Pendentes" valor="—" icon="⏳" cor="#f59e0b"
-                onClick={() => navigate('/visitas')} />
+            onClick={() => navigate('/visitas?filtro=PENDENTE')} />
           <Card titulo="Concluídas" valor="—" icon="✅" cor="#10b981"
-                onClick={() => navigate('/visitas')} />
+            onClick={() => navigate('/visitas?filtro=CONCLUIDA')} />
           <Card titulo="Promotores" valor="—" icon="👥" cor="#6366f1"
-                onClick={() => navigate('/usuarios')} />
+            onClick={() => navigate('/usuarios')} />
         </div>
 
         {/* Menu de navegação */}

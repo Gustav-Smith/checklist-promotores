@@ -9,6 +9,7 @@ export default function Checklist() {
   const [itens, setItens] = useState([]);
   const [novaTarefa, setNovaTarefa] = useState('');
   const [carregando, setCarregando] = useState(true);
+  const [fotoSelecionada, setFotoSelecionada] = useState({});
 
   useEffect(() => {
     carregarDados();
@@ -39,7 +40,27 @@ export default function Checklist() {
   }
 
   async function concluirItem(id) {
-    await api.patch(`/itens-checklist/${id}/concluir`);
+    let urlFoto = null;
+
+    if (fotoSelecionada[id]) {
+      const formData = new FormData();
+      formData.append('file', fotoSelecionada[id]);
+      const { data } = await api.post('/uploads', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      urlFoto = data.url;
+    }
+
+    await api.patch(`/itens-checklist/${id}/concluir${urlFoto ? `?observacao=foto` : ''}`);
+
+    if (urlFoto) {
+      await api.put(`/itens-checklist/${id}`, {
+        visitaId: Number(visitaId),
+        tarefa: itens.find(i => i.id === id).tarefa,
+        urlFoto: urlFoto,
+      });
+    }
+    setFotoSelecionada(prev => ({ ...prev, [id]: null }));
     carregarDados();
   }
 
@@ -134,14 +155,37 @@ export default function Checklist() {
 
               <div style={styles.itemAcoes}>
                 {!item.concluido && visita?.status !== 'CONCLUIDA' && (
-                  <button style={styles.btnConcluir} onClick={() => concluirItem(item.id)}>
-                    Concluir
-                  </button>
+                  <>
+                    <label style={styles.btnFoto}>
+                      📷
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={(e) => setFotoSelecionada(prev => ({
+                          ...prev,
+                          [item.id]: e.target.files[0]
+                        }))}
+                      />
+                    </label>
+                    {fotoSelecionada[item.id] && (
+                      <span style={styles.fotoNome}>
+                        ✅ {fotoSelecionada[item.id].name.substring(0, 15)}...
+                      </span>
+                    )}
+                    <button style={styles.btnConcluir} onClick={() => concluirItem(item.id)}>
+                      Concluir
+                    </button>
+                  </>
+                )}
+                {item.urlFoto && (
+                  <a href={`http://localhost:8080${item.urlFoto}`} target="_blank" rel="noreferrer"
+                    style={styles.btnVerFoto}>
+                    🖼 Ver foto
+                  </a>
                 )}
                 {visita?.status !== 'CONCLUIDA' && (
-                  <button style={styles.btnDeletar} onClick={() => deletarItem(item.id)}>
-                    🗑
-                  </button>
+                  <button style={styles.btnDeletar} onClick={() => deletarItem(item.id)}>🗑</button>
                 )}
               </div>
             </div>
@@ -205,5 +249,15 @@ const styles = {
   btnDeletar: {
     backgroundColor: '#fee2e2', border: 'none',
     padding: '6px 10px', borderRadius: '6px', cursor: 'pointer',
+  },
+  btnFoto: {
+    backgroundColor: '#e0e7ff', border: 'none',
+    padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '16px',
+  },
+  fotoNome: { fontSize: '12px', color: '#666', maxWidth: '100px', overflow: 'hidden' },
+  btnVerFoto: {
+    backgroundColor: '#f0fdf4', color: '#10b981', border: '1px solid #10b981',
+    padding: '6px 12px', borderRadius: '6px', cursor: 'pointer',
+    fontWeight: '600', fontSize: '13px', textDecoration: 'none',
   },
 };
