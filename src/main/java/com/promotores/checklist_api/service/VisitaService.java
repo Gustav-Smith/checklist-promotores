@@ -16,6 +16,7 @@ public class VisitaService {
     private final UsuarioRepository usuarioRepository;
     private final SupermercadoRepository supermercadoRepository;
     private final IndustriaRepository industriaRepository;
+    private final ItemChecklistRepository itemChecklistRepository;
 
     public List<Visita> listarTodas() {
         return visitaRepository.findAll();
@@ -83,7 +84,10 @@ public class VisitaService {
     }
 
     public void deletar(Long id) {
-        buscarPorId(id);
+        Visita visita = buscarPorId(id);
+        // Deleta os itens do checklist primeiro
+        itemChecklistRepository.deleteAll(
+                itemChecklistRepository.findByVisitaOrderByOrdem(visita));
         visitaRepository.deleteById(id);
     }
 }
