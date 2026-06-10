@@ -30,11 +30,13 @@ export default function Checklist() {
 
   async function adicionarItem() {
     if (!novaTarefa.trim()) return;
-    await api.post('/itens-checklist', {
+    const payload = {
       visitaId: Number(visitaId),
       tarefa: novaTarefa,
       ordem: itens.length + 1,
-    });
+    };
+    console.log('Criando item:', payload);
+    await api.post('/itens-checklist', payload);
     setNovaTarefa('');
     carregarDados();
   }
@@ -43,12 +45,20 @@ export default function Checklist() {
     let urlFoto = null;
 
     if (fotoSelecionada[id]) {
-      const formData = new FormData();
-      formData.append('file', fotoSelecionada[id]);
-      const { data } = await api.post('/uploads', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      urlFoto = data.url;
+      try {
+        const formData = new FormData();
+        formData.append('file', fotoSelecionada[id]);
+        console.log('Enviando foto:', fotoSelecionada[id].name);
+        const { data } = await api.post('/uploads', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        urlFoto = data.url;
+        console.log('URL da foto:', urlFoto);
+      } catch (err) {
+        console.error('Erro no upload:', err.response?.data || err.message);
+      }
+    } else {
+      console.log('Nenhuma foto selecionada para item:', id);
     }
 
     await api.patch(`/itens-checklist/${id}/concluir${urlFoto ? `?observacao=foto` : ''}`);

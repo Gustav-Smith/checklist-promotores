@@ -52,6 +52,9 @@ public class ItemChecklistService {
         item.setTarefa(dto.getTarefa());
         item.setObservacao(dto.getObservacao());
         item.setOrdem(dto.getOrdem());
+        if (dto.getUrlFoto() != null) {
+            item.setUrlFoto(dto.getUrlFoto());
+        }
         return repository.save(item);
     }
 
